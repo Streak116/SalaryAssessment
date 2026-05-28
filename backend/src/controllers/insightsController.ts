@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import * as employeeService from '../services/employeeService.js';
+import * as insightsService from '../services/insightsService.js';
 
 export const getCountryStats = asyncHandler(async (req: Request, res: Response) => {
-  const stats = await employeeService.getCountryStatsService();
+  const stats = await insightsService.getCountryStatsService();
   return res.json(stats);
 });
 
@@ -14,11 +14,11 @@ export const getJobTitleStats = asyncHandler(async (req: Request, res: Response)
     return res.status(400).json({ error: 'Country query parameter is required' });
   }
 
-  const stats = await employeeService.getJobTitleStatsService(country);
+  const stats = await insightsService.getJobTitleStatsService(country);
   return res.json(stats);
 });
 
 export const getDashboardSummary = asyncHandler(async (req: Request, res: Response) => {
-  const summary = await employeeService.getDashboardSummaryService();
+  const summary = await insightsService.getDashboardSummaryService();
   return res.json(summary);
 });
