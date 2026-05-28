@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import employeeRoutes from './routes/employeeRoutes.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 
@@ -15,3 +16,5 @@ app.use('/api/employees', employeeRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Salary Management API is running' });
 });
+
+app.use(errorHandler);
