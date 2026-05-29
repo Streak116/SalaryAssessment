@@ -79,3 +79,45 @@ export function updateEmployee(id: string, payload: UpdateEmployeePayload): Prom
 export function deleteEmployee(id: string): Promise<void> {
   return request<void>(`/api/employees/${id}`, { method: 'DELETE' });
 }
+
+export interface DepartmentStat {
+  department: string;
+  avgSalary: number;
+  count: number;
+}
+
+export interface DashboardSummary {
+  totalActiveHeadcount: number;
+  totalInactiveHeadcount: number;
+  totalActivePayroll: number;
+  globalAverageSalary: number;
+  departmentStats: DepartmentStat[];
+}
+
+export interface CountryStat {
+  country: string;
+  minSalary: number;
+  maxSalary: number;
+  avgSalary: number;
+  count: number;
+}
+
+export interface JobTitleStat {
+  jobTitle: string;
+  avgSalary: number;
+  count: number;
+}
+
+export function getDashboardSummary(): Promise<DashboardSummary> {
+  return request<DashboardSummary>('/api/insights/dashboard-summary');
+}
+
+export function getCountryStats(): Promise<CountryStat[]> {
+  return request<CountryStat[]>('/api/insights/country-stats');
+}
+
+export function getJobTitleStats(country: string): Promise<JobTitleStat[]> {
+  const qs = new URLSearchParams();
+  qs.set('country', country);
+  return request<JobTitleStat[]>(`/api/insights/job-title-stats?${qs.toString()}`);
+}
