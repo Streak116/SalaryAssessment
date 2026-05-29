@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon, Bell, Search, Settings } from 'lucide-react';
+import { Sun, Moon, Bell, Search } from 'lucide-react';
 
 export default function Header() {
   const [darkMode, setDarkMode] = useState(false);
@@ -9,7 +9,7 @@ export default function Header() {
   useEffect(() => {
     // Check local storage or document class list
     const isDark = document.documentElement.classList.contains('dark');
-    setDarkMode(isDark);
+    Promise.resolve().then(() => setDarkMode(isDark));
   }, []);
 
   const toggleTheme = () => {

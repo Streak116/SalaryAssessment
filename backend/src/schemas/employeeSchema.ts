@@ -14,6 +14,7 @@ export const employeeCreateSchema = z.object({
     errorMap: () => ({ message: 'Gender must be Male, Female, or Non-binary' }),
   }),
   isActive: z.boolean().optional(),
+  hireDate: z.string().optional(),
 });
 
 export type EmployeeCreateInput = z.infer<typeof employeeCreateSchema>;

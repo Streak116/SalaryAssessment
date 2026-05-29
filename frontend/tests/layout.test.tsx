@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
-import Sidebar from '../src/components/Sidebar';
-import Header from '../src/components/Header';
+import Sidebar from '@/components/Sidebar';
+import Header from '@/components/Header';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({

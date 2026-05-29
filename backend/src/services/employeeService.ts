@@ -2,10 +2,11 @@ import { prisma } from '../db/client.js';
 import { EmployeeCreateInput } from '../schemas/employeeSchema.js';
 
 export async function createEmployeeService(data: EmployeeCreateInput) {
+  const { hireDate, ...rest } = data;
   return prisma.employee.create({
     data: {
-      ...data,
-      hireDate: new Date(),
+      ...rest,
+      hireDate: hireDate ? new Date(hireDate) : new Date(),
     },
   });
 }
@@ -67,9 +68,14 @@ export async function getEmployeeByIdService(id: string) {
 }
 
 export async function updateEmployeeService(id: string, data: Partial<EmployeeCreateInput>) {
+  const { hireDate, ...rest } = data;
+  const updateData: any = { ...rest };
+  if (hireDate !== undefined) {
+    updateData.hireDate = hireDate ? new Date(hireDate) : null;
+  }
   return prisma.employee.update({
     where: { id },
-    data,
+    data: updateData,
   });
 }
 

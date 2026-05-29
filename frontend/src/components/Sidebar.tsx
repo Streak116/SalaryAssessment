@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, TrendingUp, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Users, DollarSign } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
