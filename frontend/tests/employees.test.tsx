@@ -1,7 +1,10 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import EmployeesPage from '@/app/employees/page';
+import { DialogProvider } from '@/context/DialogContext';
+
+const render = (ui: React.ReactNode) => rtlRender(ui, { wrapper: DialogProvider });
 
 // ---------------------------------------------------------------------------
 // Mock next/navigation
@@ -201,6 +204,20 @@ describe('Employees Page', () => {
           expect.objectContaining({ fullName: 'New Person', jobTitle: 'Analyst' })
         );
       });
+
+      // Verify success popup displays
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+        expect(screen.getByText(/employee created/i)).toBeInTheDocument();
+      });
+
+      // Dismiss the success popup
+      fireEvent.click(screen.getByRole('button', { name: /ok/i }));
+
+      // Dialog should close
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -247,6 +264,20 @@ describe('Employees Page', () => {
           'emp-1',
           expect.objectContaining({ fullName: 'Alice Johnson Updated' })
         );
+      });
+
+      // Verify success popup displays
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
+        expect(screen.getByText(/employee updated/i)).toBeInTheDocument();
+      });
+
+      // Dismiss the success popup
+      fireEvent.click(screen.getByRole('button', { name: /ok/i }));
+
+      // Dialog should close
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       });
     });
   });

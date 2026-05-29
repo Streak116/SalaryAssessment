@@ -4,55 +4,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Users, Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from '../../lib/api';
 import type { Employee, GetEmployeesParams } from '../../lib/api';
+import { useDialog } from '@/context/DialogContext';
 
 // ---------------------------------------------------------------------------
 // Sub-components (inline for now — extracted in refactor step)
 // ---------------------------------------------------------------------------
-
-/** ConfirmDialog */
-function ConfirmDialog({
-  open,
-  onConfirm,
-  onCancel,
-}: {
-  open: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  if (!open) return null;
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-    >
-      <div className="bg-card border border-border rounded-2xl shadow-2xl p-8 w-full max-w-sm flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-bold text-foreground">Delete Employee</h2>
-          <p className="text-sm text-muted-foreground">
-            Are you sure you want to delete this employee? This action cannot be undone.
-          </p>
-        </div>
-        <div className="flex gap-3 justify-end">
-          <button
-            aria-label="Cancel"
-            onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            aria-label="Confirm"
-            onClick={onConfirm}
-            className="px-4 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /** Employee Drawer (Add / Edit) */
 const EMPTY_FORM = {
@@ -300,6 +256,8 @@ function EmployeeDrawer({
 // Main Page
 // ---------------------------------------------------------------------------
 export default function EmployeesPage() {
+  const { showDialog } = useDialog();
+
   // ---- state ----------------------------------------------------------------
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [total, setTotal]         = useState(0);
@@ -312,9 +270,6 @@ export default function EmployeesPage() {
   const [drawerOpen, setDrawerOpen]   = useState(false);
   const [drawerMode, setDrawerMode]   = useState<'add' | 'edit'>('add');
   const [editTarget, setEditTarget]   = useState<Employee | null>(null);
-
-  // Delete dialog
-  const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null);
 
   const LIMIT = 20;
 
@@ -395,19 +350,36 @@ export default function EmployeesPage() {
 
     if (drawerMode === 'add') {
       await createEmployee(payload);
+      closeDrawer();
+      fetchEmployees();
+      await showDialog({
+        type: 'info',
+        title: 'Employee Created',
+        message: `Employee "${payload.fullName}" has been successfully created.`,
+      });
     } else if (editTarget) {
       await updateEmployee(editTarget.id, payload);
+      closeDrawer();
+      fetchEmployees();
+      await showDialog({
+        type: 'info',
+        title: 'Employee Updated',
+        message: `Employee "${payload.fullName}" has been successfully updated.`,
+      });
     }
-    closeDrawer();
-    fetchEmployees();
   };
 
   // ---- delete ---------------------------------------------------------------
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
-    await deleteEmployee(deleteTarget.id);
-    setDeleteTarget(null);
-    fetchEmployees();
+  const handleDeleteClick = async (emp: Employee) => {
+    const confirmed = await showDialog({
+      type: 'confirmation',
+      title: 'Delete Employee',
+      message: `Are you sure you want to delete this employee? This action cannot be undone.`,
+    });
+    if (confirmed) {
+      await deleteEmployee(emp.id);
+      fetchEmployees();
+    }
   };
 
   // ---- pagination -----------------------------------------------------------
@@ -527,7 +499,7 @@ export default function EmployeesPage() {
                         </button>
                         <button
                           aria-label="Delete"
-                          onClick={() => setDeleteTarget(emp)}
+                          onClick={() => handleDeleteClick(emp)}
                           className="p-1.5 rounded-lg hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -577,11 +549,6 @@ export default function EmployeesPage() {
         initial={initialFormValues(editTarget)}
         onClose={closeDrawer}
         onSave={handleSave}
-      />
-      <ConfirmDialog
-        open={!!deleteTarget}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );
