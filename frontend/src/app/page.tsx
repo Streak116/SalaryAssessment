@@ -21,6 +21,8 @@ import type {
   CountryStat, 
   JobTitleStat 
 } from '../lib/api';
+import KPICard from '@/components/KPICard';
+import HorizontalBarChart from '@/components/HorizontalBarChart';
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -109,17 +111,7 @@ export default function DashboardPage() {
     );
   }
 
-  // Calculate max department salary for horizontal bar rendering
-  const maxDeptAvg = Math.max(
-    ...(summary?.departmentStats.map((d) => d.avgSalary) ?? [1]),
-    1
-  );
 
-  // Calculate max job average salary for horizontal bar rendering
-  const maxJobAvg = Math.max(
-    ...(jobStats.map((j) => j.avgSalary) ?? [1]),
-    1
-  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -138,81 +130,41 @@ export default function DashboardPage() {
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* KPI 1: Active Headcount */}
-        <div className="glass-interactive p-6 rounded-2xl flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Active Headcount
-            </p>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
-              {summary?.totalActiveHeadcount.toLocaleString()}
-            </h2>
-            <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-              Active organization staff
-            </p>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Users className="w-6 h-6 text-primary" />
-          </div>
-        </div>
-
-        {/* KPI 2: Total Active Payroll */}
-        <div className="glass-interactive p-6 rounded-2xl flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Active Payroll
-            </p>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
-              {formatSalary(summary?.totalActivePayroll ?? 0)}
-            </h2>
-            <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
-              Total active annual budget
-            </p>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
-            <DollarSign className="w-6 h-6 text-accent-foreground" />
-          </div>
-        </div>
-
-        {/* KPI 3: Global Average Salary */}
-        <div className="glass-interactive p-6 rounded-2xl flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Average Salary
-            </p>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
-              {formatSalary(summary?.globalAverageSalary ?? 0)}
-            </h2>
-            <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-warning inline-block" />
-              Mean organization payout
-            </p>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-            <Award className="w-6 h-6 text-warning" />
-          </div>
-        </div>
-
-        {/* KPI 4: Inactive Status Headcount */}
-        <div className="glass-interactive p-6 rounded-2xl flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Inactive Staff
-            </p>
-            <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
-              {summary?.totalInactiveHeadcount.toLocaleString()}
-            </h2>
-            <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 inline-block" />
-              Inactive/Archived profiles
-            </p>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-            <Activity className="w-6 h-6 text-muted-foreground" />
-          </div>
-        </div>
+        <KPICard
+          title="Active Headcount"
+          value={summary?.totalActiveHeadcount.toLocaleString() ?? '0'}
+          icon={Users}
+          iconBgClass="bg-primary/10"
+          subText="Active organization staff"
+          dotColorClass="bg-success"
+        />
+        <KPICard
+          title="Active Payroll"
+          value={formatSalary(summary?.totalActivePayroll ?? 0)}
+          icon={DollarSign}
+          iconClass="text-accent-foreground"
+          iconBgClass="bg-accent"
+          subText="Total active annual budget"
+          dotColorClass="bg-primary"
+        />
+        <KPICard
+          title="Average Salary"
+          value={formatSalary(summary?.globalAverageSalary ?? 0)}
+          icon={Award}
+          iconClass="text-warning"
+          iconBgClass="bg-warning/10"
+          subText="Mean organization payout"
+          dotColorClass="bg-warning"
+        />
+        <KPICard
+          title="Inactive Staff"
+          value={summary?.totalInactiveHeadcount.toLocaleString() ?? '0'}
+          icon={Activity}
+          iconClass="text-muted-foreground"
+          iconBgClass="bg-muted"
+          subText="Inactive/Archived profiles"
+          dotColorClass="bg-muted-foreground/40"
+        />
       </div>
 
       {/* Main Charts & Analytics Section */}
@@ -223,28 +175,16 @@ export default function DashboardPage() {
             <Layers className="w-5 h-5 text-primary" />
             <h3 className="text-md font-bold text-foreground">Department Salaries</h3>
           </div>
-          <div className="flex-1 flex flex-col justify-center gap-5">
-            {summary?.departmentStats.map((dept) => {
-              const percent = (dept.avgSalary / maxDeptAvg) * 100;
-              return (
-                <div key={dept.department} className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-foreground">{dept.department}</span>
-                    <span className="text-muted-foreground">
-                      <strong className="text-foreground">{formatSalary(dept.avgSalary)}</strong> avg{' '}
-                      <span className="text-[10px]">({dept.count} {dept.count === 1 ? 'employee' : 'employees'})</span>
-                    </span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 h-full rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <HorizontalBarChart
+            items={(summary?.departmentStats ?? []).map((d) => ({
+              id: d.department,
+              label: d.department,
+              value: d.avgSalary,
+              count: d.count,
+            }))}
+            valueFormatter={formatSalary}
+            gradientClass="from-blue-500 via-indigo-500 to-violet-500"
+          />
         </div>
 
         {/* Job Title Insights per Selected Country */}
@@ -275,34 +215,17 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col justify-center gap-5">
-            {jobStats.length === 0 ? (
-              <p className="text-center text-xs text-muted-foreground py-8">
-                No job title insights found.
-              </p>
-            ) : (
-              jobStats.map((job) => {
-                const percent = (job.avgSalary / maxJobAvg) * 100;
-                return (
-                  <div key={job.jobTitle} className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-foreground">{job.jobTitle}</span>
-                      <span className="text-muted-foreground">
-                        <strong className="text-foreground">{formatSalary(job.avgSalary)}</strong> avg{' '}
-                        <span className="text-[10px]">({job.count} {job.count === 1 ? 'employee' : 'employees'})</span>
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 h-full rounded-full transition-all duration-700 ease-out"
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
+          <HorizontalBarChart
+            items={jobStats.map((j) => ({
+              id: j.jobTitle,
+              label: j.jobTitle,
+              value: j.avgSalary,
+              count: j.count,
+            }))}
+            valueFormatter={formatSalary}
+            gradientClass="from-violet-500 via-purple-500 to-fuchsia-500"
+            emptyMessage="No job title insights found."
+          />
         </div>
       </div>
 
