@@ -346,6 +346,10 @@ describe('Employees Page', () => {
       await waitFor(() => screen.getByText('Alice Johnson'));
       expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /previous/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /first/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /last/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/go to page/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /go/i })).toBeInTheDocument();
     });
 
     it('calls getEmployees with next page when Next is clicked', async () => {
@@ -365,10 +369,106 @@ describe('Employees Page', () => {
       });
     });
 
-    it('disables the Previous button on page 1', async () => {
+    it('calls getEmployees with totalPages when Last is clicked', async () => {
+      vi.mocked(api.getEmployees).mockResolvedValue({
+        data: MOCK_EMPLOYEES,
+        pagination: { total: 60, page: 1, limit: 20, totalPages: 3 },
+      });
+      render(<EmployeesPage />);
+      await waitFor(() => screen.getByText('Alice Johnson'));
+
+      fireEvent.click(screen.getByRole('button', { name: /last/i }));
+
+      await waitFor(() => {
+        expect(api.getEmployees).toHaveBeenCalledWith(
+          expect.objectContaining({ page: 3 })
+        );
+      });
+    });
+
+    it('calls getEmployees with first page when First is clicked', async () => {
+      // Start on page 2
+      vi.mocked(api.getEmployees).mockResolvedValue({
+        data: MOCK_EMPLOYEES,
+        pagination: { total: 60, page: 2, limit: 20, totalPages: 3 },
+      });
+      render(<EmployeesPage />);
+      await waitFor(() => screen.getByText('Alice Johnson'));
+
+      fireEvent.click(screen.getByRole('button', { name: /first/i }));
+
+      await waitFor(() => {
+        expect(api.getEmployees).toHaveBeenCalledWith(
+          expect.objectContaining({ page: 1 })
+        );
+      });
+    });
+
+    it('calls getEmployees with target page when user inputs page and presses Enter', async () => {
+      vi.mocked(api.getEmployees).mockResolvedValue({
+        data: MOCK_EMPLOYEES,
+        pagination: { total: 60, page: 1, limit: 20, totalPages: 3 },
+      });
+      render(<EmployeesPage />);
+      await waitFor(() => screen.getByText('Alice Johnson'));
+
+      const input = screen.getByLabelText(/go to page/i);
+      fireEvent.change(input, { target: { value: '2' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await waitFor(() => {
+        expect(api.getEmployees).toHaveBeenCalledWith(
+          expect.objectContaining({ page: 2 })
+        );
+      });
+    });
+
+    it('calls getEmployees with target page when user inputs page and clicks Go button', async () => {
+      vi.mocked(api.getEmployees).mockResolvedValue({
+        data: MOCK_EMPLOYEES,
+        pagination: { total: 60, page: 1, limit: 20, totalPages: 3 },
+      });
+      render(<EmployeesPage />);
+      await waitFor(() => screen.getByText('Alice Johnson'));
+
+      const input = screen.getByLabelText(/go to page/i);
+      fireEvent.change(input, { target: { value: '3' } });
+
+      const goButton = screen.getByRole('button', { name: /go/i });
+      fireEvent.click(goButton);
+
+      await waitFor(() => {
+        expect(api.getEmployees).toHaveBeenCalledWith(
+          expect.objectContaining({ page: 3 })
+        );
+      });
+    });
+
+    it('does not trigger page change on input blur', async () => {
+      vi.mocked(api.getEmployees).mockResolvedValue({
+        data: MOCK_EMPLOYEES,
+        pagination: { total: 60, page: 1, limit: 20, totalPages: 3 },
+      });
+      render(<EmployeesPage />);
+      await waitFor(() => screen.getByText('Alice Johnson'));
+
+      const input = screen.getByLabelText(/go to page/i);
+      fireEvent.change(input, { target: { value: '2' } });
+      
+      // Clear mock calls to be sure
+      vi.mocked(api.getEmployees).mockClear();
+
+      fireEvent.blur(input);
+
+      // Verify getEmployees was not called on blur
+      expect(api.getEmployees).not.toHaveBeenCalled();
+    });
+
+    it('disables the Previous and First button on page 1', async () => {
       render(<EmployeesPage />);
       await waitFor(() => screen.getByText('Alice Johnson'));
       expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /first/i })).toBeDisabled();
     });
   });
 

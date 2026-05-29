@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Pencil, Trash2 } from 'lucide-react';
 import type { Employee } from '@/lib/api';
 
 interface EmployeeTableProps {
@@ -23,6 +23,31 @@ export default function EmployeeTable({
   onEdit,
   onDelete,
 }: EmployeeTableProps) {
+  const [inputPage, setInputPage] = useState(String(page));
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setInputPage(String(page));
+    });
+  }, [page]);
+
+  const handlePageSubmit = () => {
+    const parsed = parseInt(inputPage, 10);
+    if (isNaN(parsed) || parsed < 1 || parsed > totalPages) {
+      setInputPage(String(page)); // reset
+      return;
+    }
+    onPageChange(parsed);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handlePageSubmit();
+    }
+  };
+
+  const inputWidthPx = Math.max(3, String(totalPages).length) * 12 + 16;
+
   const formatSalary = (n: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
 
@@ -110,11 +135,43 @@ export default function EmployeeTable({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between px-5 py-4 border-t border-border bg-muted/20">
-        <p className="text-xs text-muted-foreground">
+      <div className="flex items-center justify-between px-5 py-4 border-t border-border bg-muted/20 flex-wrap gap-4">
+        <p className="text-xs text-muted-foreground whitespace-nowrap">
           Page {page} of {totalPages}
         </p>
+
+        {/* Jump to specific page input */}
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span>Go to:</span>
+          <input
+            type="number"
+            min={1}
+            max={totalPages}
+            value={inputPage}
+            onChange={(e) => setInputPage(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            aria-label="Go to page"
+            style={{ width: `${inputWidthPx}px` }}
+            className="px-1.5 py-1 text-center rounded border border-border bg-card focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-foreground font-mono text-xs"
+          />
+          <button
+            onClick={handlePageSubmit}
+            className="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity cursor-pointer text-xs"
+          >
+            Go
+          </button>
+        </div>
+
         <div className="flex items-center gap-2">
+          <button
+            aria-label="First"
+            onClick={() => onPageChange(1)}
+            disabled={page <= 1}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted transition-colors cursor-pointer"
+          >
+            <ChevronsLeft className="w-3.5 h-3.5" />
+            First
+          </button>
           <button
             aria-label="Previous"
             onClick={() => onPageChange(page - 1)}
@@ -132,6 +189,15 @@ export default function EmployeeTable({
           >
             Next
             <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+          <button
+            aria-label="Last"
+            onClick={() => onPageChange(totalPages)}
+            disabled={page >= totalPages}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-muted transition-colors cursor-pointer"
+          >
+            Last
+            <ChevronsRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
