@@ -1,4 +1,20 @@
 services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_password
+      - POSTGRES_DB=salary_streak
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d salary_streak"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -6,8 +22,11 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - '3001:3001'
-    volumes:
-      - backend_db:/app/backend/prisma
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres_password@db:5432/salary_streak?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
     build:
@@ -21,4 +40,4 @@ services:
       - backend
 
 volumes:
-  backend_db:
+  postgres_data:
