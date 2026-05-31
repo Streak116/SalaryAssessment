@@ -1,16 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 const prisma = new PrismaClient();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Resolve data directory relative to the working directory (process.cwd()).
+// This works for both tsx development runs and compiled production builds:
+// - tsx: cwd is /app/backend -> ../data = /app/data ✓
+// - compiled dist: cwd is /app/backend -> ../data = /app/data ✓
+function resolveDataPath(filename: string): string {
+  // Allow overriding via DATA_DIR env var (useful for custom deployments)
+  const dataDir = process.env.DATA_DIR || path.resolve(process.cwd(), '../data');
+  return path.join(dataDir, filename);
+}
 
 export async function seedDatabase() {
-  const firstNamesPath = path.resolve(__dirname, '../../../data/first_names.txt');
-  const lastNamesPath = path.resolve(__dirname, '../../../data/last_names.txt');
+  const firstNamesPath = resolveDataPath('first_names.txt');
+  const lastNamesPath = resolveDataPath('last_names.txt');
 
   const firstNames = fs.readFileSync(firstNamesPath, 'utf-8')
     .split('\n')
