@@ -1,7 +1,10 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import React from 'react';
 import DashboardPage from '@/app/page';
+import { DialogProvider } from '@/context/DialogContext';
+
+const render = (ui: React.ReactNode) => rtlRender(ui, { wrapper: DialogProvider });
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/',
@@ -123,6 +126,17 @@ describe('Salary Insights Dashboard Page', () => {
       expect(api.getJobTitleStats).toHaveBeenCalledWith('Canada');
       expect(screen.getAllByText(/Designer/)[0]).toBeInTheDocument();
       expect(screen.queryByText(/Product Manager/)).not.toBeInTheDocument();
+    });
+  });
+
+  it('displays warning dialog when dashboard API load fails', async () => {
+    vi.mocked(api.getDashboardSummary).mockRejectedValue(new Error('API Error'));
+    render(<DashboardPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(screen.getByText(/error loading dashboard data/i)).toBeInTheDocument();
+      expect(screen.getByText(/api error/i)).toBeInTheDocument();
     });
   });
 });

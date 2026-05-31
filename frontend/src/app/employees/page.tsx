@@ -42,11 +42,17 @@ export default function EmployeesPage() {
         setEmployees(res.data);
         setTotal(res.pagination.total);
         setTotalPages(res.pagination.totalPages);
+      } catch (err) {
+        showDialog({
+          type: 'warning',
+          title: 'Error Fetching Employees',
+          message: err instanceof Error ? err.message : 'An unexpected error occurred.',
+        });
       } finally {
         setLoading(false);
       }
     },
-    [page, search]
+    [page, search, showDialog]
   );
 
   useEffect(() => {
@@ -108,23 +114,31 @@ export default function EmployeesPage() {
       isActive:   values.isActive,
     };
 
-    if (drawerMode === 'add') {
-      await createEmployee(payload);
-      closeDrawer();
-      fetchEmployees();
+    try {
+      if (drawerMode === 'add') {
+        await createEmployee(payload);
+        closeDrawer();
+        fetchEmployees();
+        await showDialog({
+          type: 'info',
+          title: 'Employee Created',
+          message: `Employee "${payload.fullName}" has been successfully created.`,
+        });
+      } else if (editTarget) {
+        await updateEmployee(editTarget.id, payload);
+        closeDrawer();
+        fetchEmployees();
+        await showDialog({
+          type: 'info',
+          title: 'Employee Updated',
+          message: `Employee "${payload.fullName}" has been successfully updated.`,
+        });
+      }
+    } catch (err) {
       await showDialog({
-        type: 'info',
-        title: 'Employee Created',
-        message: `Employee "${payload.fullName}" has been successfully created.`,
-      });
-    } else if (editTarget) {
-      await updateEmployee(editTarget.id, payload);
-      closeDrawer();
-      fetchEmployees();
-      await showDialog({
-        type: 'info',
-        title: 'Employee Updated',
-        message: `Employee "${payload.fullName}" has been successfully updated.`,
+        type: 'warning',
+        title: drawerMode === 'add' ? 'Failed to Create Employee' : 'Failed to Update Employee',
+        message: err instanceof Error ? err.message : 'An unexpected error occurred.',
       });
     }
   };
@@ -137,8 +151,16 @@ export default function EmployeesPage() {
       message: `Are you sure you want to delete this employee? This action cannot be undone.`,
     });
     if (confirmed) {
-      await deleteEmployee(emp.id);
-      fetchEmployees();
+      try {
+        await deleteEmployee(emp.id);
+        fetchEmployees();
+      } catch (err) {
+        await showDialog({
+          type: 'warning',
+          title: 'Failed to Delete Employee',
+          message: err instanceof Error ? err.message : 'An unexpected error occurred.',
+        });
+      }
     }
   };
 

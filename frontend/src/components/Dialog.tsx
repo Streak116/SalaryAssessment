@@ -42,7 +42,7 @@ export default function Dialog({
   }
 
   // Determine button labels
-  const finalConfirmLabel = confirmLabel || (type === 'info' ? 'OK' : 'Confirm');
+  const finalConfirmLabel = confirmLabel || (type === 'confirmation' ? 'Confirm' : 'OK');
   const finalCancelLabel = cancelLabel || 'Cancel';
 
   return (
@@ -68,7 +68,7 @@ export default function Dialog({
         </div>
 
         <div className="flex gap-3 justify-end">
-          {type !== 'info' && onCancel && (
+          {type === 'confirmation' && onCancel && (
             <button
               type="button"
               aria-label={finalCancelLabel}

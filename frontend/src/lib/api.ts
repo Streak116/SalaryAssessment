@@ -1,3 +1,5 @@
+import { ENDPOINTS } from './endpoints';
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export interface Employee {
@@ -59,25 +61,25 @@ export function getEmployees(
   if (params.country)    qs.set('country',    params.country);
   if (params.department) qs.set('department', params.department);
   const query = qs.toString();
-  return request<PaginatedResponse<Employee>>(`/api/employees${query ? `?${query}` : ''}`);
+  return request<PaginatedResponse<Employee>>(`${ENDPOINTS.EMPLOYEES}${query ? `?${query}` : ''}`);
 }
 
 export function createEmployee(payload: CreateEmployeePayload): Promise<Employee> {
-  return request<Employee>('/api/employees', {
+  return request<Employee>(ENDPOINTS.EMPLOYEES, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
 export function updateEmployee(id: string, payload: UpdateEmployeePayload): Promise<Employee> {
-  return request<Employee>(`/api/employees/${id}`, {
+  return request<Employee>(ENDPOINTS.EMPLOYEE_BY_ID(id), {
     method: 'PUT',
     body: JSON.stringify(payload),
   });
 }
 
 export function deleteEmployee(id: string): Promise<void> {
-  return request<void>(`/api/employees/${id}`, { method: 'DELETE' });
+  return request<void>(ENDPOINTS.EMPLOYEE_BY_ID(id), { method: 'DELETE' });
 }
 
 export interface DepartmentStat {
@@ -109,15 +111,15 @@ export interface JobTitleStat {
 }
 
 export function getDashboardSummary(): Promise<DashboardSummary> {
-  return request<DashboardSummary>('/api/insights/dashboard-summary');
+  return request<DashboardSummary>(ENDPOINTS.DASHBOARD_SUMMARY);
 }
 
 export function getCountryStats(): Promise<CountryStat[]> {
-  return request<CountryStat[]>('/api/insights/country-stats');
+  return request<CountryStat[]>(ENDPOINTS.COUNTRY_STATS);
 }
 
 export function getJobTitleStats(country: string): Promise<JobTitleStat[]> {
   const qs = new URLSearchParams();
   qs.set('country', country);
-  return request<JobTitleStat[]>(`/api/insights/job-title-stats?${qs.toString()}`);
+  return request<JobTitleStat[]>(`${ENDPOINTS.JOB_TITLE_STATS}?${qs.toString()}`);
 }

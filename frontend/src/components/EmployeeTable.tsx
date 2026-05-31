@@ -72,11 +72,34 @@ export default function EmployeeTable({
           </thead>
           <tbody className="divide-y divide-border">
             {loading ? (
-              <tr>
-                <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground text-sm">
-                  Loading…
-                </td>
-              </tr>
+              Array.from({ length: 5 }).map((_, idx) => (
+                <tr key={idx} className="animate-pulse">
+                  <td className="px-5 py-4">
+                    <div className="h-4 w-28 bg-muted rounded" />
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="h-4 w-36 bg-muted rounded" />
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="h-4 w-24 bg-muted rounded" />
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="h-5 w-16 bg-muted rounded-full" />
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="h-4 w-20 bg-muted rounded font-mono" />
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="h-4 w-24 bg-muted rounded" />
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex gap-2">
+                      <div className="w-7 h-7 bg-muted rounded-lg" />
+                      <div className="w-7 h-7 bg-muted rounded-lg" />
+                    </div>
+                  </td>
+                </tr>
+              ))
             ) : employees.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground text-sm">

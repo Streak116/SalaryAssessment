@@ -114,9 +114,8 @@ describe('Reusable Dialog Component', () => {
   });
 
   describe('Warning Type', () => {
-    it('renders two buttons (Confirm and Cancel)', () => {
+    it('renders with only one button (OK by default)', () => {
       const handleConfirm = vi.fn();
-      const handleCancel = vi.fn();
 
       render(
         <Dialog
@@ -125,20 +124,14 @@ describe('Reusable Dialog Component', () => {
           title="Danger Warning"
           message="Warning details"
           onConfirm={handleConfirm}
-          onCancel={handleCancel}
         />
       );
 
-      const cancelBtn = screen.getByRole('button', { name: /cancel/i });
-      const confirmBtn = screen.getByRole('button', { name: /confirm/i });
+      const buttons = screen.getAllByRole('button');
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0]).toHaveTextContent('OK');
 
-      expect(cancelBtn).toBeInTheDocument();
-      expect(confirmBtn).toBeInTheDocument();
-
-      fireEvent.click(cancelBtn);
-      expect(handleCancel).toHaveBeenCalledTimes(1);
-
-      fireEvent.click(confirmBtn);
+      fireEvent.click(buttons[0]);
       expect(handleConfirm).toHaveBeenCalledTimes(1);
     });
   });

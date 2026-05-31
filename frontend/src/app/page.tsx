@@ -23,8 +23,10 @@ import type {
 } from '../lib/api';
 import KPICard from '@/components/KPICard';
 import HorizontalBarChart from '@/components/HorizontalBarChart';
+import { useDialog } from '@/context/DialogContext';
 
 export default function DashboardPage() {
+  const { showDialog } = useDialog();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [countryStats, setCountryStats] = useState<CountryStat[]>([]);
   const [selectedCountry, setSelectedCountry] = useState('');
@@ -36,9 +38,13 @@ export default function DashboardPage() {
       const stats = await getJobTitleStats(country);
       setJobStats(stats);
     } catch (err) {
-      console.error('Failed to load job title stats:', err);
+      showDialog({
+        type: 'warning',
+        title: 'Error Fetching Job Title Stats',
+        message: err instanceof Error ? err.message : 'An unexpected error occurred.',
+      });
     }
-  }, []);
+  }, [showDialog]);
 
   useEffect(() => {
     let isMounted = true;
@@ -62,7 +68,11 @@ export default function DashboardPage() {
           setJobStats(jobData);
         }
       } catch (err) {
-        console.error('Failed to load dashboard insights:', err);
+        showDialog({
+          type: 'warning',
+          title: 'Error Loading Dashboard Data',
+          message: err instanceof Error ? err.message : 'An unexpected error occurred.',
+        });
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -72,7 +82,7 @@ export default function DashboardPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [showDialog]);
 
   const handleCountryChange = async (country: string) => {
     setSelectedCountry(country);
