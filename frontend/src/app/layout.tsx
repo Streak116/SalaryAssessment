@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SalaryPro - Organisation Salary Assessment Tool",
+  title: "Salary Streak - Organisation Salary Assessment Tool",
   description: "Advanced analytics and management for organization payroll and employee compensation profiles.",
 };
 

@@ -22,7 +22,7 @@ describe('Layout Components', () => {
   describe('Sidebar Component', () => {
     it('renders the application branding', () => {
       render(<Sidebar />);
-      expect(screen.getByText(/SalaryPro/i)).toBeInTheDocument();
+      expect(screen.getByText(/Salary Streak/i)).toBeInTheDocument();
     });
 
     it('renders navigation links', () => {

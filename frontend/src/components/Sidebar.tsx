@@ -30,7 +30,7 @@ export default function Sidebar() {
             <DollarSign className="w-5 h-5 text-white" />
           </div>
           <span className="font-sans text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent-foreground bg-clip-text text-transparent group-hover:opacity-90 transition-opacity">
-            SalaryPro
+            Salary Streak
           </span>
         </Link>
       </div>
