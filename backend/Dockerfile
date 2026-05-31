@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:20-slim
 
 WORKDIR /app
 
@@ -12,8 +12,11 @@ WORKDIR /app/backend
 COPY backend/package*.json ./
 COPY backend/prisma ./prisma/
 
+# Install system build dependencies for native modules (like better-sqlite3)
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+
 # Install all dependencies and build Prisma Client
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npx prisma generate
 
 # Copy backend source files
@@ -25,4 +28,4 @@ RUN npm run build
 EXPOSE 3001
 
 # Execute migrations, run seeder, and launch server
-CMD npx prisma migrate deploy && npx prisma db seed && npm run start
+CMD npx prisma db push && npx prisma db seed && npm run start
