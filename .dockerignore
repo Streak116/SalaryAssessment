@@ -1,0 +1,17 @@
+node_modules
+**/node_modules
+**/dist
+**/.next
+**/out
+**/*.db
+**/*.db-journal
+**/*.db-shm
+**/*.db-wal
+.git
+.gitignore
+.vscode
+.env
+.env.*
+README.md
+docker-compose.yml
+**/Dockerfile

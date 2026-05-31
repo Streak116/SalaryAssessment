@@ -96,6 +96,16 @@ A suite of **73 fast, deterministic tests** covers the entire application struct
    * Backend: `npm run test:backend`
    * Frontend: `npm run test:frontend`
 
+### Containerized Run (Docker Compose)
+For instant deployment with zero local environment setup (automatically compiles source code, installs libraries, runs database migrations, and seeds the 10,000 employee records):
+1. **Launch services**:
+   ```bash
+   docker compose up --build
+   ```
+2. **Access the application**:
+   * Frontend Web App: `http://localhost:3000`
+   * Backend Rest API: `http://localhost:3001`
+
 ---
 
 ## 7. Future Roadmap & Extension Scope
