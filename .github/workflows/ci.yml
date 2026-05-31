@@ -31,6 +31,9 @@ jobs:
       - name: Generate Prisma Client
         run: npm run db:generate -w backend
 
+      - name: Setup Database (SQLite)
+        run: npm run db:push -w backend
+
       - name: Run Backend Tests
         run: npm run test:backend
 
