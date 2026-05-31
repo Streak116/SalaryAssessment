@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { Users, Plus, Search } from 'lucide-react';
-import { getEmployees, createEmployee, updateEmployee, deleteEmployee } from '../../lib/api';
+import { getEmployees, createEmployee, updateEmployee, deleteEmployee, getEmployee } from '../../lib/api';
 import type { Employee, GetEmployeesParams } from '../../lib/api';
 import { useDialog } from '@/context/DialogContext';
 
@@ -76,10 +76,22 @@ export default function EmployeesPage() {
     setDrawerOpen(true);
   };
 
-  const openEdit = (emp: Employee) => {
-    setDrawerMode('edit');
-    setEditTarget(emp);
-    setDrawerOpen(true);
+  const openEdit = async (emp: Employee) => {
+    setLoading(true);
+    try {
+      const latest = await getEmployee(emp.id);
+      setDrawerMode('edit');
+      setEditTarget(latest);
+      setDrawerOpen(true);
+    } catch (err) {
+      await showDialog({
+        type: 'warning',
+        title: 'Error Loading Employee Details',
+        message: err instanceof Error ? err.message : 'An unexpected error occurred.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeDrawer = () => setDrawerOpen(false);

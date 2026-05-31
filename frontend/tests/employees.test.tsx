@@ -19,6 +19,7 @@ vi.mock('next/navigation', () => ({
 // ---------------------------------------------------------------------------
 vi.mock('@/lib/api', () => ({
   getEmployees: vi.fn(),
+  getEmployee: vi.fn(),
   createEmployee: vi.fn(),
   updateEmployee: vi.fn(),
   deleteEmployee: vi.fn(),
@@ -83,6 +84,10 @@ describe('Employees Page', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(api.getEmployees).mockResolvedValue(MOCK_PAGINATED_RESPONSE);
+    vi.mocked(api.getEmployee).mockImplementation((id) => {
+      const emp = MOCK_EMPLOYEES.find(e => e.id === id);
+      return Promise.resolve(emp || MOCK_EMPLOYEES[0]);
+    });
   });
 
   // -------------------------------------------------------------------------

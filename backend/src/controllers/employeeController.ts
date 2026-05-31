@@ -52,3 +52,12 @@ export const deleteEmployee = asyncHandler(async (req: Request, res: Response) =
     message: 'Employee deleted successfully',
   });
 });
+
+export const getEmployee = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const employee = await employeeService.getEmployeeByIdService(id);
+  if (!employee) {
+    return res.status(404).json({ error: 'Employee not found' });
+  }
+  return res.json(employee);
+});

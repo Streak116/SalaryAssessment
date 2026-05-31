@@ -323,3 +323,43 @@ describe('Employee API - Delete (DELETE)', () => {
     expect(dbEmployee).toBeNull();
   });
 });
+
+describe('Employee API - Get Single (GET)', () => {
+  let employeeId: string;
+
+  beforeAll(async () => {
+    await prisma.employee.deleteMany();
+    const employee = await prisma.employee.create({
+      data: {
+        fullName: 'Jane Doe',
+        jobTitle: 'Software Engineer',
+        country: 'USA',
+        salary: 100000,
+        department: 'Engineering',
+        email: 'jane.doe@company.com',
+        employmentType: 'Full-time',
+        gender: 'Female',
+        isActive: true,
+        hireDate: new Date(),
+      },
+    });
+    employeeId = employee.id;
+  });
+
+  afterAll(async () => {
+    await prisma.employee.deleteMany();
+    await prisma.$disconnect();
+  });
+
+  it('should fetch an existing employee details by ID', async () => {
+    const response = await request(app).get(`/api/employees/${employeeId}`);
+    expect(response.status).toBe(200);
+    expect(response.body.fullName).toBe('Jane Doe');
+    expect(response.body.email).toBe('jane.doe@company.com');
+  });
+
+  it('should return 404 if employee does not exist', async () => {
+    const response = await request(app).get('/api/employees/non-existent-id');
+    expect(response.status).toBe(404);
+  });
+});

@@ -82,6 +82,10 @@ export function deleteEmployee(id: string): Promise<void> {
   return request<void>(ENDPOINTS.EMPLOYEE_BY_ID(id), { method: 'DELETE' });
 }
 
+export function getEmployee(id: string): Promise<Employee> {
+  return request<Employee>(ENDPOINTS.EMPLOYEE_BY_ID(id));
+}
+
 export interface DepartmentStat {
   department: string;
   avgSalary: number;
