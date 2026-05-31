@@ -28,4 +28,4 @@ RUN npm run build
 EXPOSE 3001
 
 # Execute migrations, run seeder, and launch server
-CMD npx prisma db push && npx prisma db seed && npm run start
+CMD npx prisma db push && npm run start
