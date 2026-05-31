@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import SearchableDropdown from './SearchableDropdown';
+import { COUNTRIES, DEPARTMENTS, JOB_TITLES_BY_DEPT, ALL_JOB_TITLES, EMPLOYMENT_TYPES, GENDERS } from '../lib/constants';
 
 export const EMPTY_FORM = {
   fullName: '',
@@ -83,6 +85,27 @@ export default function EmployeeDrawer({
     }
   };
 
+  const handleDropdownChange = (name: keyof FormValues) => (val: string) => {
+    setValues((v) => ({ ...v, [name]: val }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleDepartmentChange = (dept: string) => {
+    setValues((v) => {
+      const oldDeptTitles = JOB_TITLES_BY_DEPT[v.department] || [];
+      const shouldClear = oldDeptTitles.includes(v.jobTitle) && !(JOB_TITLES_BY_DEPT[dept] || []).includes(v.jobTitle);
+      const newJobTitle = shouldClear ? '' : v.jobTitle;
+      return {
+        ...v,
+        department: dept,
+        jobTitle: newJobTitle,
+      };
+    });
+    setErrors((prev) => ({ ...prev, department: undefined, jobTitle: undefined }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const fieldErrors = validate(values);
@@ -96,16 +119,6 @@ export default function EmployeeDrawer({
   };
 
   if (!open) return null;
-
-  const fields: Array<{ label: string; name: keyof FormValues; type?: string }> = [
-    { label: 'Full Name',   name: 'fullName' },
-    { label: 'Job Title',   name: 'jobTitle' },
-    { label: 'Country',     name: 'country' },
-    { label: 'Department',  name: 'department' },
-    { label: 'Salary',      name: 'salary',   type: 'number' },
-    { label: 'Email',       name: 'email',    type: 'email' },
-    { label: 'Hire Date',   name: 'hireDate', type: 'date' },
-  ];
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
@@ -130,73 +143,156 @@ export default function EmployeeDrawer({
 
         {/* Form */}
         <form noValidate onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-5">
-          {fields.map(({ label, name, type = 'text' }) => (
-            <div key={name} className="flex flex-col gap-1.5">
-              <label htmlFor={`field-${name}`} className="text-sm font-medium text-foreground">
-                {label}
-              </label>
-              <input
-                id={`field-${name}`}
-                name={name}
-                type={type}
-                value={values[name] as string}
-                onChange={handleChange}
-                aria-label={label}
-                aria-invalid={!!errors[name]}
-                className={`px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-colors bg-muted/20 ${
-                  errors[name]
-                    ? 'border-destructive focus:ring-destructive/30 focus:border-destructive'
-                    : 'border-border focus:ring-primary/50 focus:border-primary'
-                }`}
-              />
-              {errors[name] && (
-                <p className="text-xs text-destructive font-medium">{errors[name]}</p>
-              )}
-            </div>
-          ))}
+          {/* Full Name */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="field-fullName" className="text-sm font-medium text-foreground">
+              Full Name
+            </label>
+            <input
+              id="field-fullName"
+              name="fullName"
+              type="text"
+              value={values.fullName}
+              onChange={handleChange}
+              aria-label="Full Name"
+              aria-invalid={!!errors.fullName}
+              className={`px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-colors bg-muted/20 ${
+                errors.fullName
+                  ? 'border-destructive focus:ring-destructive/30 focus:border-destructive'
+                  : 'border-border focus:ring-primary/50 focus:border-primary'
+              }`}
+            />
+            {errors.fullName && (
+              <p className="text-xs text-destructive font-medium">{errors.fullName}</p>
+            )}
+          </div>
+
+          {/* Department */}
+          <SearchableDropdown
+            id="field-department"
+            label="Department"
+            value={values.department}
+            onChange={handleDepartmentChange}
+            options={DEPARTMENTS}
+            placeholder="Select department..."
+            error={errors.department}
+          />
+
+          {/* Job Title */}
+          <SearchableDropdown
+            id="field-jobTitle"
+            label="Job Title"
+            value={values.jobTitle}
+            onChange={handleDropdownChange('jobTitle')}
+            options={values.department ? (JOB_TITLES_BY_DEPT[values.department] || []) : ALL_JOB_TITLES}
+            placeholder={values.department ? `Select title in ${values.department}...` : "Select job title..."}
+            error={errors.jobTitle}
+          />
+
+          {/* Country */}
+          <SearchableDropdown
+            id="field-country"
+            label="Country"
+            value={values.country}
+            onChange={handleDropdownChange('country')}
+            options={COUNTRIES}
+            placeholder="Select country..."
+            error={errors.country}
+          />
+
+          {/* Salary */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="field-salary" className="text-sm font-medium text-foreground">
+              Salary
+            </label>
+            <input
+              id="field-salary"
+              name="salary"
+              type="number"
+              value={values.salary}
+              onChange={handleChange}
+              aria-label="Salary"
+              aria-invalid={!!errors.salary}
+              className={`px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-colors bg-muted/20 ${
+                errors.salary
+                  ? 'border-destructive focus:ring-destructive/30 focus:border-destructive'
+                  : 'border-border focus:ring-primary/50 focus:border-primary'
+              }`}
+            />
+            {errors.salary && (
+              <p className="text-xs text-destructive font-medium">{errors.salary}</p>
+            )}
+          </div>
+
+          {/* Email */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="field-email" className="text-sm font-medium text-foreground">
+              Email
+            </label>
+            <input
+              id="field-email"
+              name="email"
+              type="email"
+              value={values.email}
+              onChange={handleChange}
+              aria-label="Email"
+              aria-invalid={!!errors.email}
+              className={`px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-colors bg-muted/20 ${
+                errors.email
+                  ? 'border-destructive focus:ring-destructive/30 focus:border-destructive'
+                  : 'border-border focus:ring-primary/50 focus:border-primary'
+              }`}
+            />
+            {errors.email && (
+              <p className="text-xs text-destructive font-medium">{errors.email}</p>
+            )}
+          </div>
+
+          {/* Hire Date */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="field-hireDate" className="text-sm font-medium text-foreground">
+              Hire Date
+            </label>
+            <input
+              id="field-hireDate"
+              name="hireDate"
+              type="date"
+              value={values.hireDate}
+              onChange={handleChange}
+              aria-label="Hire Date"
+              aria-invalid={!!errors.hireDate}
+              className={`px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 transition-colors bg-muted/20 ${
+                errors.hireDate
+                  ? 'border-destructive focus:ring-destructive/30 focus:border-destructive'
+                  : 'border-border focus:ring-primary/50 focus:border-primary'
+              }`}
+            />
+            {errors.hireDate && (
+              <p className="text-xs text-destructive font-medium">{errors.hireDate}</p>
+            )}
+          </div>
 
           {/* Employment Type select */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="field-employmentType" className="text-sm font-medium text-foreground">
-              Employment Type
-            </label>
-            <select
-              id="field-employmentType"
-              name="employmentType"
-              value={values.employmentType}
-              onChange={(e) => {
-                setValues((v) => ({ ...v, employmentType: e.target.value as FormValues['employmentType'] }));
-              }}
-              aria-label="Employment Type"
-              className="px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors bg-muted/20 text-foreground"
-            >
-              <option value="Full-time">Full-time</option>
-              <option value="Part-time">Part-time</option>
-              <option value="Contractor">Contractor</option>
-              <option value="Intern">Intern</option>
-            </select>
-          </div>
+          <SearchableDropdown
+            id="field-employmentType"
+            label="Employment Type"
+            value={values.employmentType}
+            onChange={(val) => handleDropdownChange('employmentType')(val as FormValues['employmentType'])}
+            options={EMPLOYMENT_TYPES}
+            placeholder="Select employment type..."
+            error={errors.employmentType}
+          />
 
           {/* Gender select */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="field-gender" className="text-sm font-medium text-foreground">
-              Gender
-            </label>
-            <select
-              id="field-gender"
-              name="gender"
-              value={values.gender}
-              onChange={(e) => {
-                setValues((v) => ({ ...v, gender: e.target.value as FormValues['gender'] }));
-              }}
-              aria-label="Gender"
-              className="px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors bg-muted/20 text-foreground"
-            >
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Non-binary">Non-binary</option>
-            </select>
-          </div>
+          <SearchableDropdown
+            id="field-gender"
+            label="Gender"
+            value={values.gender}
+            onChange={(val) => handleDropdownChange('gender')(val as FormValues['gender'])}
+            options={GENDERS}
+            placeholder="Select gender..."
+            error={errors.gender}
+          />
 
           {/* Active Status checkbox */}
           <div className="flex items-center gap-2 py-1">
